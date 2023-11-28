@@ -38,6 +38,7 @@ void IRAM_ATTR onTimer1()
   {
     ch2 = 0;
   }
+
   if (sin(2 * pi * MotorF * t_sec + (4 * pi / 3)) * 1000 > counter_us(t))
   {
     ch3 = 1;
@@ -51,6 +52,10 @@ void IRAM_ATTR onTimer1()
   GPIO.out_w1tc = (ch1 << ch12) + (ch2 << ch22) + (ch3 << ch32);
   GPIO.out_w1ts = ((1 - ch1) << ch12) + ((1 - ch2) << ch22) + ((1 - ch3) << ch32);
   GPIO.out_w1tc = ((1 - ch1) << ch11) + ((1 - ch2) << ch21) + ((1 - ch3) << ch31);
+  Serial.println("Hello World");
+  Serial.printf("pin15: %d\n", analogRead(15));
+  Serial.printf("pin13: %d\n", analogRead(13));
+  Serial.printf("pin32: %d\n", analogRead(32));
 }
 
 void setup()
@@ -63,14 +68,18 @@ void setup()
   pinMode(ch22, OUTPUT);
   pinMode(ch31, OUTPUT);
   pinMode(ch32, OUTPUT);
+  pinMode(15, INPUT);
+  pinMode(13, INPUT);
+  pinMode(32, INPUT);
   int ch1 = 0;
   int ch2 = 0;
   int ch3 = 0;
 
   tmr0 = timerBegin(0, 80, true);
   timerAttachInterrupt(tmr0, &onTimer1, true);
-  timerAlarmWrite(tmr0, 10, true);
+  timerAlarmWrite(tmr0, 100, true);
   timerAlarmEnable(tmr0);
+  Serial.begin(115200);
 }
 
 void loop()
