@@ -21,7 +21,7 @@ typedef struct {
   uint16_t pin33;
 } data_t;
 hw_timer_t *tmr0 = NULL;
-data_t data[1000];
+volatile data_t data[1000];
 void IRAM_ATTR onTimer1() {
   /*
     Serial.printf("pin15: %u\n", analogReadMilliVolts(15));
@@ -33,6 +33,7 @@ void IRAM_ATTR onTimer1() {
 volatile int ch1 = 0;
 volatile int ch2 = 0;
 volatile int ch3 = 0;
+void SaveState(void *args);
 void Core0a(void *args);
 void setup() {
   // put your setup code here, to run once:
@@ -57,7 +58,7 @@ void setup() {
   // timerAlarmWrite(tmr0, 1000000, true);
   // timerAlarmEnable(tmr0);
   Serial.begin(115200);
-  // xTaskCreatePinnedToCore(Core0a, "Core0a", 4096, NULL, 3, &thp[0], 0);
+  xTaskCreatePinnedToCore(Core0a, "Core0a", 4096, NULL, 3, &thp[0], 0);
 }
 
 void loop() {
@@ -98,7 +99,7 @@ void loop() {
     ch2 = 0;
     ch3 = 0;
   }//*/
-  Core0a(NULL);
+  SaveState(NULL);
   if (counter_us(t) > 0.15) {
     GPIO.out_w1ts = (ch1 << ch11) + (ch2 << ch21) + (ch3 << ch31);
     GPIO.out_w1tc = (ch1 << ch12) + (ch2 << ch22) + (ch3 << ch32);
@@ -118,8 +119,12 @@ double counter_us(int t) {
 }
 uint16_t adc1, adc2, adc3;
 bool c1, c2, c3;
-int i = 0;
-void IRAM_ATTR Core0a(void *args) {
+
+void SaveState(void *args) {
+  static int i = 0;
+  if (i == 1000) {
+    i = 0;
+  }
   adc1 = analogRead(15);
   adc2 = analogRead(13);
   adc3 = analogRead(33);
@@ -138,11 +143,19 @@ void IRAM_ATTR Core0a(void *args) {
   data[i].pin13 = adc2;
   data[i].pin33 = adc3;
   i++;
-  if (i == 1000) {
-    i = 0;
-    for (int j = 0; j < 1000; j++) {
-      Serial.printf("%d,%d,%d,%d\n", data[j].channels, data[j].pin15,
-                    data[j].pin13, data[j].pin33);
+}
+void Core0a(void *args) {
+  static int i = 0;
+  while (1) {
+    i++;
+    if (i == 1000) {
+      i = 0;
+      for (int j = 0; j < 1000; j++) {
+        Serial.printf("%d,%d,%d,%d\n", data[j].channels, data[j].pin15,
+                      data[j].pin13, data[j].pin33);
+      }
     }
+    Serial.flush();
+    delay(1);
   }
 }
