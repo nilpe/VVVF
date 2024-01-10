@@ -57,7 +57,7 @@ void setup() {
   // timerAlarmWrite(tmr0, 1000000, true);
   // timerAlarmEnable(tmr0);
   Serial.begin(115200);
-  xTaskCreatePinnedToCore(Core0a, "Core0a", 4096, NULL, 3, &thp[0], 0);
+  // xTaskCreatePinnedToCore(Core0a, "Core0a", 4096, NULL, 3, &thp[0], 0);
 }
 
 void loop() {
@@ -92,16 +92,15 @@ void loop() {
   } else {
     ch3 = 0;
   } //*/
-  /*if (counter_us(t) < 0.4 ) {
-    ch1 = 0; // pin15,32
-    ch2 = 1; // pin13,34
-    ch3 = 0; // pin33,35
-  } else {
-    ch1 = 0;
-    ch2 = 0;
-    ch3 = 0;
-  }//*/
-
+    /*if (counter_us(t) < 0.4 ) {
+      ch1 = 0; // pin15,32
+      ch2 = 1; // pin13,34
+      ch3 = 0; // pin33,35
+    } else {
+      ch1 = 0;
+      ch2 = 0;
+      ch3 = 0;
+    }//*/
   Core0a(NULL);
   GPIO.out_w1ts = (ch1 << ch11) + (ch2 << ch21) + (ch3 << ch31);
   GPIO.out_w1tc = (ch1 << ch12) + (ch2 << ch22) + (ch3 << ch32);
@@ -117,10 +116,10 @@ double counter_us(int t) {
 uint16_t adc1, adc2, adc3;
 bool c1, c2, c3;
 int i = 0;
-void Core0a(void *args) {
-  adc1 = analogReadMilliVolts(15);
-  adc2 = analogReadMilliVolts(13);
-  adc3 = analogReadMilliVolts(33);
+void IRAM_ATTR Core0a(void *args) {
+  adc1 = analogRead(15);
+  adc2 = analogRead(13);
+  adc3 = analogRead(33);
   c1 = ch1;
   c2 = ch2;
   c3 = ch3;
