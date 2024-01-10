@@ -57,6 +57,7 @@ void setup() {
   // timerAlarmWrite(tmr0, 1000000, true);
   // timerAlarmEnable(tmr0);
   Serial.begin(115200);
+  xTaskCreatePinnedToCore(Core0a, "Core0a", 4096, NULL, 3, &thp[0], 0);
 }
 
 void loop() {
