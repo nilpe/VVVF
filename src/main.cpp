@@ -72,42 +72,45 @@ void loop() {
       MotorF += 1;
       t = 0;
     }//*/
-  if ((sin(2 * pi * MotorF * t_sec) * 1000) > counter_us(t) &&
-      counter_us(t) < 0.15) {
+  if ((sin(2 * pi * MotorF * t_sec) * 1000) > counter_us(t)) {
 
     ch1 = 1;
   } else {
     ch1 = 0;
   }
-  if ((sin(2 * pi * MotorF * t_sec + (2 * pi / 3)) * 1000) > counter_us(t) &&
-      counter_us(t) < 0.15) {
+  if ((sin(2 * pi * MotorF * t_sec + (2 * pi / 3)) * 1000) > counter_us(t)) {
     ch2 = 1;
   } else {
     ch2 = 0;
   }
 
-  if (sin(2 * pi * MotorF * t_sec + (4 * pi / 3)) * 1000 > counter_us(t) &&
-      counter_us(t) < 0.15) {
+  if (sin(2 * pi * MotorF * t_sec + (4 * pi / 3)) * 1000 > counter_us(t)) {
     ch3 = 1;
   } else {
     ch3 = 0;
   } //*/
-    /*if (counter_us(t) < 0.4 ) {
-      ch1 = 0; // pin15,32
-      ch2 = 1; // pin13,34
-      ch3 = 0; // pin33,35
-    } else {
-      ch1 = 0;
-      ch2 = 0;
-      ch3 = 0;
-    }//*/
+  /*if (counter_us(t) < 0.4 ) {
+    ch1 = 0; // pin15,32
+    ch2 = 1; // pin13,34
+    ch3 = 0; // pin33,35
+  } else {
+    ch1 = 0;
+    ch2 = 0;
+    ch3 = 0;
+  }//*/
   Core0a(NULL);
-  GPIO.out_w1ts = (ch1 << ch11) + (ch2 << ch21) + (ch3 << ch31);
-  GPIO.out_w1tc = (ch1 << ch12) + (ch2 << ch22) + (ch3 << ch32);
-  GPIO.out_w1ts =
-      ((1 - ch1) << ch12) + ((1 - ch2) << ch22) + ((1 - ch3) << ch32);
-  GPIO.out_w1tc =
-      ((1 - ch1) << ch11) + ((1 - ch2) << ch21) + ((1 - ch3) << ch31);
+  if (counter_us(t) > 0.15) {
+    GPIO.out_w1ts = (ch1 << ch11) + (ch2 << ch21) + (ch3 << ch31);
+    GPIO.out_w1tc = (ch1 << ch12) + (ch2 << ch22) + (ch3 << ch32);
+    GPIO.out_w1ts =
+        ((1 - ch1) << ch12) + ((1 - ch2) << ch22) + ((1 - ch3) << ch32);
+    GPIO.out_w1tc =
+        ((1 - ch1) << ch11) + ((1 - ch2) << ch21) + ((1 - ch3) << ch31);
+  } else {
+    // GPIO.out_w1ts = (ch1 << ch11) + (ch2 << ch21) + (ch3 << ch31);
+    GPIO.out_w1tc = (1 << ch12) + (1 << ch22) + (1 << ch32);
+    GPIO.out_w1ts = ((1) << ch12) + ((1) << ch22) + ((1) << ch32);
+  }
 }
 double counter_us(int t) {
   double time_in_period = double(t % int(PERIOD_US));
